@@ -5,76 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>    
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=7860d1b50bb75ee31bc5115bbfe5c70c&libraries=services"></script>
-
-    <title>Document</title>
-
+    <!-- jqGrid CSS -->
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/jqgrid/4.6.0/css/ui.jqgrid.css" type="text/css" />
+    <!-- The jqGrid language file code-->
+    <script type="text/javascript" src="//cdn.jsdelivr.net/jqgrid/4.6.0/i18n/grid.locale-kr.js"></script>
+    <!-- The atual jqGrid code -->
+    <script type="text/javascript" src="//cdn.jsdelivr.net/jqgrid/4.6.0/jquery.jqGrid.src.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <title>메인페이지</title>
+    
     <script>
         // 현재 위치 가져오기
         navigator.geolocation.getCurrentPosition(getSuccess, getError);
 
         // 가져오기 성공
         function getSuccess(position) {
-        // 위도
-        const lat = position.coords.latitude;
-        // 경도
-        const lng = position.coords.longitude;
-        // 위도 경도 오차(m)
-        const accuracy = Math.floor(position.coords.accuracy);
 
-        getAddr(lat,lng);
+            // 시간
+            var today = new Date();
 
+            var year = today.getFullYear();
+            var month = ('0' + (today.getMonth() + 1)).slice(-2);
+            var day = ('0' + today.getDate()).slice(-2);
 
-        var conv = dfs_xy_conv('toXY',lat,lng);
+            var ymd = year +''+ month +''+day;
 
-        var xhr = new XMLHttpRequest();
-        var url = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst'; /*URL*/
-        var queryParams = '?' + encodeURIComponent('serviceKey') + '='+'Ah9gIeZdtUkp3q9AMHmad%2BFS5KWFC2Y%2B%2BdjGRxmB7U1OGbpWJraVpM%2BxYIiB2yxxCt%2Bme8G8eR3i8rcrh89ZtQ%3D%3D'; /*Service Key*/
-        queryParams += '&' + encodeURIComponent('pageNo') + '=' + encodeURIComponent('1'); /**/
-        queryParams += '&' + encodeURIComponent('numOfRows') + '=' + encodeURIComponent('1000'); /**/   
-        queryParams += '&' + encodeURIComponent('dataType') + '=' + encodeURIComponent('JSON'); /**/
-        queryParams += '&' + encodeURIComponent('base_date') + '=' + encodeURIComponent('20231106'); /**/
-        queryParams += '&' + encodeURIComponent('base_time') + '=' + encodeURIComponent('0500'); /**/
-        queryParams += '&' + encodeURIComponent('nx') + '=' + encodeURIComponent(conv.x); /**/
-        queryParams += '&' + encodeURIComponent('ny') + '=' + encodeURIComponent(conv.y); /**/
-        xhr.open('GET', url + queryParams);
+            // 위도
+            const lat = position.coords.latitude;
+            // 경도
+            const lng = position.coords.longitude;
+            // 위도 경도 오차(m)
+            const accuracy = Math.floor(position.coords.accuracy);
 
-        console.log(url, queryParams)
-        
-        xhr.onreadystatechange = function () {
-            if (this.readyState == 4) {
-                alert('Status: '+this.status+'nHeaders: '+JSON.stringify(this.getAllResponseHeaders())+'nBody: '+this.responseText);
+            getAddr(lat,lng);
 
-                console.log('Status: '+this.status+'nHeaders: '+JSON.stringify(this.getAllResponseHeaders())+'nBody: '+this.responseText);
+            var conv = dfs_xy_conv('toXY',lat,lng);
 
-                debugger;
+            var xhr = new XMLHttpRequest();
+            var url = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst'; /*URL*/
+            var queryParams = '?' + encodeURIComponent('serviceKey') + '='+'Ah9gIeZdtUkp3q9AMHmad%2BFS5KWFC2Y%2B%2BdjGRxmB7U1OGbpWJraVpM%2BxYIiB2yxxCt%2Bme8G8eR3i8rcrh89ZtQ%3D%3D'; /*Service Key*/
+            queryParams += '&' + encodeURIComponent('pageNo') + '=' + encodeURIComponent('1'); /**/
+            queryParams += '&' + encodeURIComponent('numOfRows') + '=' + encodeURIComponent('1000'); /**/   
+            queryParams += '&' + encodeURIComponent('dataType') + '=' + encodeURIComponent('JSON'); /**/
+            queryParams += '&' + encodeURIComponent('base_date') + '=' + encodeURIComponent(ymd); /**/
+            queryParams += '&' + encodeURIComponent('base_time') + '=' + encodeURIComponent('0500'); /**/
+            queryParams += '&' + encodeURIComponent('nx') + '=' + encodeURIComponent(conv.x); /**/
+            queryParams += '&' + encodeURIComponent('ny') + '=' + encodeURIComponent(conv.y); /**/
+            xhr.open('GET', url + queryParams);
 
-                var aaa = JSON.parse(this.responseText);
+            xhr.onreadystatechange = function () {
+                if (this.readyState == 4) {
 
-                console.log(aaa.response.body.items.item[0]);
+                    var aaa = JSON.parse(this.responseText);
 
-            }
-        };
+                    console.log(aaa.response.body.items.item);
 
-        xhr.send('');
-
+                    jqgridSearch(aaa.response.body.items.item);
+                }
+            };
+            xhr.send('');
         }
 
         // 가지오기 실패(거부)
         function getError() {
-        alert('Geolocation Error');
+            alert('Geolocation Error');
         }
 
-        // 기상 api 받아 옴
-
-       $(document).ready(function(){
-
-
-       });
-
-
        function getAddr(x,y){
-
-         console.log(x+"asdasdad"+y);
 
             var geocoder = new kakao.maps.services.Geocoder();
 
@@ -82,33 +81,27 @@
         }
 
         const callback = (result,status) => {
-        if(status === kakao.maps.services.Status.OK) {
+            if(status === kakao.maps.services.Status.OK) {
 
-            var depthNm_1 =  result[0].address.region_1depth_name;
-            var depthNm_2 =  result[0].address.region_2depth_name;
-            var depthNm_3 =  result[0].address.region_3depth_name;
-            var deptNm = depthNm_1 +' '+depthNm_2+' '+depthNm_3
+                var depthNm_1 =  result[0].address.region_1depth_name;
+                var depthNm_2 =  result[0].address.region_2depth_name;
+                var depthNm_3 =  result[0].address.region_3depth_name;
+                var deptNm = depthNm_1 +' '+depthNm_2+' '+depthNm_3
 
-            $("#korAddress").text(deptNm);
+                $("#korAddress").text(deptNm);
+            }
         }
-        }
-
-
-        
-
     </script>
-
-
-// 소스출처 : http://www.kma.go.kr/weather/forecast/digital_forecast.jsp  내부에 있음
-// 기상청에서 이걸 왜 공식적으로 공개하지 않을까?
-//
-// (사용 예)
-// var rs = dfs_xy_conv("toLL","60","127");
-// console.log(rs.lat, rs.lng);
-//
 
 <script language="javascript">
     //<!--
+    // 소스출처 : http://www.kma.go.kr/weather/forecast/digital_forecast.jsp  내부에 있음
+    // 기상청에서 이걸 왜 공식적으로 공개하지 않을까?
+    //
+    // (사용 예)
+    // var rs = dfs_xy_conv("toLL","60","127");
+    // console.log(rs.lat, rs.lng);
+    //
     //
     // LCC DFS 좌표변환을 위한 기초 자료
     //
@@ -123,7 +116,6 @@
     //
     // LCC DFS 좌표변환 ( code : "toXY"(위경도->좌표, v1:위도, v2:경도), "toLL"(좌표->위경도,v1:x, v2:y) )
     //
-
 
     function dfs_xy_conv(code, v1, v2) {
         var DEGRAD = Math.PI / 180.0;
@@ -182,10 +174,98 @@
     }
     //-->
 </script>
+
+
+<script>
+
+    function filterCategort(el){
+
+        if ( el.category == 'TMP' || el.category == 'POP' || el.category == 'PCP' || el.category == 'SNO' || el.category == 'SKY'){
+            return true;
+        }
+
+    }
+
+    function jqgridSearch(mydata){
+
+        var filterData = mydata.filter(filterCategort);
+
+        $("#list").jqGrid({
+            datatype: "local",
+            data: filterData,
+            colNames:['날짜', '시간', '카테고리','값'],
+            colModel:[
+                {name:'fcstDate', index:'fcstDate', width:90, align: "center"},
+                {name:'fcstTime', index:'fcstTime', width:50 , align: "center" },
+                {name:'category', index:'category', width:50, align: "center" ,sortable:false },
+                {name:'fcstValue', index:'fcstValue', width:80, align: "center"}
+            ],
+            autowidth: true,
+            rownumbers : true,
+            multiselect:true,
+            pager:'#pager',
+            rowNum: 30,
+            rowList: [10, 20, 50],
+            sortname: 'id',
+            sortorder: 'asc',
+            height: 550,
+        });
+    
+    }       
+
+
+
+    $(document).ready(function() {
+
+        $(window).on('resize.jqGrid', function() {
+            $("#list").jqGrid('setGridWidth', $("#list").parent().parent().parent().parent().parent().width());
+        })
+        $(".jarviswidget-fullscreen-btn").click(function(){
+            setTimeout(function() {
+                $("#list").jqGrid('setGridWidth', $("#list").parent().parent().parent().parent().parent().width());
+            }, 100);
+        });
+
+    });
+    </script>
+    
+
+
 </head>
 <body>
     <div>
         <p id="korAddress"></p>
     </div>
+
+    <table id="list"></table>
+    <div id="pager"></div>
+
+    <div>
+        <canvas id="myChart"></canvas>
+    </div>
 </body>
+
+
+<script>
+    const ctx = document.getElementById('myChart');
+  
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+        datasets: [{
+          label: '# of Votes',
+          data: [12, 19, 3, 5, 2, 3],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  </script>
 </html>
