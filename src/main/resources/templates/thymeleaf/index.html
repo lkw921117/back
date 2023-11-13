@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>    
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=7860d1b50bb75ee31bc5115bbfe5c70c&libraries=services"></script>
+<!-- jqGrid CSS -->
+<link rel="stylesheet" href="//cdn.jsdelivr.net/jqgrid/4.6.0/css/ui.jqgrid.css" type="text/css" />
+<!-- The jqGrid language file code-->
+<script type="text/javascript" src="//cdn.jsdelivr.net/jqgrid/4.6.0/i18n/grid.locale-kr.js"></script>
+<!-- The atual jqGrid code -->
+<script type="text/javascript" src="//cdn.jsdelivr.net/jqgrid/4.6.0/jquery.jqGrid.src.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- 좌표계 → 블럭 -->
+<script type="text/javascript" src="/js/weather.js"></script>
+
+<title>메인페이지</title>
+    
+<script>
+	// 현재 위치 가져오기
+	navigator.geolocation.getCurrentPosition(getSuccess, getError);
+	// 위도
+	let lat = "";
+	// 경도
+	let lng = "";
+	// 위도 경도 오차(m)
+	let accuracy = "";
+
+	// 가져오기 성공
+	function getSuccess(position) {
+		
+	    lat = position.coords.latitude;
+	    
+	    lng = position.coords.longitude;
+	    
+	    accuracy = Math.floor(position.coords.accuracy);
+	}
+	// 가지오기 실패(거부)
+	function getError() {
+	    alert('Geolocation Error');
+	}
+	
+	
+	$(document).ready(function() {
+		
+		var conv = dfs_xy_conv("toXY",lat,lng);
+		//ex) conv = {lat: 35.907757, lng: 127.766922, x: 74, y: 91} 
+		
+		$.ajax({
+			url:"/aaaaa",
+			data:conv,
+			method:'post',
+			success:function(data){
+				
+				console.log(data);
+				
+			}
+		});
+	
+	
+	});
+</script>
+
+</head>
+<body>
+    <div>
+        <p id="korAddress"></p>
+    </div>
+
+    <table id="list"></table>
+    <div id="pager"></div>
+
+    <div>
+        <canvas id="myChart"></canvas>
+    </div>
+</body>
+
+
+<script>
+    const ctx = document.getElementById('myChart');
+  
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+        datasets: [{
+          label: '# of Votes',
+          data: [12, 19, 3, 5, 2, 3],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  </script>
+</html>
